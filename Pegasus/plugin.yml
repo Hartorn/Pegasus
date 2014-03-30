@@ -1,0 +1,7 @@
+name: Pegasus
+main: io.github.hartorn.Pegasus.Pegasus
+version: 0.1 DEV
+author: Hartorn
+commands: 
+    pegasus:
+        description: Create a pegasus

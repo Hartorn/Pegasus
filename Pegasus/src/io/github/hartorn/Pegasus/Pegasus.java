@@ -4,9 +4,9 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.server.v1_7_R2.BiomeBase;
-import net.minecraft.server.v1_7_R2.BiomeMeta;
-import net.minecraft.server.v1_7_R2.EntityTypes;
+import net.minecraft.server.v1_7_R1.BiomeBase;
+import net.minecraft.server.v1_7_R1.BiomeMeta;
+import net.minecraft.server.v1_7_R1.EntityTypes;
 
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -27,7 +27,7 @@ public final class Pegasus extends JavaPlugin {
 	}
 
 	public void onDisable(){
-		getLogger().info("egasus Plugin has been enabled.");
+		getLogger().info("Pegasus Plugin has been enabled.");
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

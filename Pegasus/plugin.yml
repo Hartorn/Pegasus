@@ -5,3 +5,13 @@ author: Hartorn
 commands: 
     pegasus:
         description: Create a pegasus
+        permission: pegasus.create
+        permission-message: You're not allowed to create pegasus.
+permissions:
+    pegasus.*:
+        description: Gives access to all pegasus commands
+        children:
+            pegasus.create: true
+    pegasus.create:
+        description: Allows you to create pegasus.
+        default: op

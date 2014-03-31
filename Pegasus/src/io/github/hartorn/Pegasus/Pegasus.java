@@ -27,7 +27,7 @@ public final class Pegasus extends JavaPlugin {
 	}
 
 	public void onDisable(){
-		getLogger().info("Pegasus Plugin has been enabled.");
+		getLogger().info("Pegasus Plugin has been disabled.");
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -98,7 +98,7 @@ public final class Pegasus extends JavaPlugin {
 		{
 			Player player = (Player)sender;
 			this.joueur = player;
-			if (cmd.getName().equalsIgnoreCase("pegasus")) {
+			if (cmd.getName().equalsIgnoreCase("pegasus") && player.hasPermission("pegasus.create")) {
 				Horse monture = PegasusEntity.spawn(player);
 				monture.setOwner(player);
 				monture.setCarryingChest(true);

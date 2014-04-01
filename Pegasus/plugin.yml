@@ -3,15 +3,23 @@ main: io.github.hartorn.Pegasus.Pegasus
 version: 0.1 DEV
 author: Hartorn
 commands: 
-    pegasus:
+    pegasus-create:
         description: Create a pegasus
         permission: pegasus.create
         permission-message: You're not allowed to create pegasus.
+    pegasus-customise:
+        description: Customise a pegasus
+        permission: pegasus.customise
+        permission-message: You're not allowed to customise pegasus.
 permissions:
     pegasus.*:
         description: Gives access to all pegasus commands
         children:
             pegasus.create: true
+            pegasus.customise: true
     pegasus.create:
         description: Allows you to create pegasus.
+        default: op
+    pegasus.customise:
+        description: Allows you to customise your own pegasus.
         default: op

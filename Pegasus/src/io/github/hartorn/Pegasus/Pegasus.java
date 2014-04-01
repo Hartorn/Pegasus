@@ -11,6 +11,7 @@ import net.minecraft.server.v1_7_R1.EntityTypes;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_7_R1.entity.CraftEntity;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -31,7 +32,7 @@ public final class Pegasus extends JavaPlugin {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static void registerEntities(){
+	private static void registerEntities(){
 		for (CustomEntityType entity : CustomEntityType.values()){
 			try {
 				Field c = EntityTypes.class.getDeclaredField("c");
@@ -92,24 +93,91 @@ public final class Pegasus extends JavaPlugin {
 			}
 		}
 	}
+
 	public boolean onCommand(CommandSender sender, Command cmd, String CommandLabel, String[] args)
 	{
 		if ((sender instanceof Player))
 		{
 			Player player = (Player)sender;
 			this.joueur = player;
-			if (cmd.getName().equalsIgnoreCase("pegasus") && player.hasPermission("pegasus.create")) {
+			if (cmd.getName().equalsIgnoreCase("pegasus-create") && player.hasPermission("pegasus.create")) {	
 				Horse monture = PegasusEntity.spawn(player);
-				monture.setOwner(player);
-				monture.setCarryingChest(true);
-				monture.setCanPickupItems(true);
-				monture.getInventory().setSaddle(new ItemStack(Material.SADDLE));
-				monture.setRemoveWhenFarAway(false);
-				monture.setTamed(true);
-				monture.setJumpStrength(1);
+				setPegasusProperties(monture, args, player, true);
+				player.sendMessage("Your pegasus has spawned.");
+			}
+			else if (cmd.getName().equalsIgnoreCase("pegasus-customise") && player.hasPermission("pegasus.customise")) {	
+				if(player.getVehicle()!=null && ((CraftEntity)player.getVehicle()).getHandle() instanceof PegasusEntity)
+				{
+					Horse monture = Horse.class.cast(player.getVehicle());
+					if(monture.getOwner().equals(player))
+					{
+						setPegasusProperties(monture, args, player, false);
+						player.sendMessage("Your pegasus has been customised.");
+					}
+					else
+					{
+						player.sendMessage("It is not your pegasus...");
+					}
+				}
 			}
 		}
 		return false;
 	}
 
-}
+	private void setPegasusProperties(Horse monture, String args[], Player player, boolean isCreation)
+	{
+		if(isCreation)
+		{
+			monture.setOwner(player);
+			monture.setCarryingChest(true);
+			monture.setCanPickupItems(true);
+			monture.getInventory().setSaddle(new ItemStack(Material.SADDLE));
+			monture.setRemoveWhenFarAway(false);
+			monture.setTamed(true);
+			monture.setJumpStrength(1);
+		}
+		if(args!=null && args.length >0)
+		{
+			for(String argument : args){
+				if(argument.length()!=0)
+				{
+					if (argument.equalsIgnoreCase("WHITE_C"))
+					{
+						monture.setColor(Horse.Color.WHITE);
+					}
+					else{
+						for(Horse.Color color: Horse.Color.values()){
+							if(color.name().equalsIgnoreCase(argument))
+							{
+								monture.setColor(color);
+								break;
+							} 
+						}
+					}
+					if (argument.equalsIgnoreCase("WHITE_S"))
+					{
+						monture.setStyle(Horse.Style.WHITE);
+					}
+					else{
+						for(Horse.Style style: Horse.Style.values()){
+							if(style.name().equalsIgnoreCase(argument))
+							{
+								monture.setStyle(style);
+								break;
+							}
+						}
+					}
+					for(Horse.Variant variant: Horse.Variant.values()){
+						if(variant.name().equalsIgnoreCase(argument))
+						{
+							monture.setVariant(variant);
+							break;
+						}
+					}
+					monture.setCustomName(args[0]);
+					monture.setCustomNameVisible(true);
+				}
+			}
+		}
+	}
+}                      

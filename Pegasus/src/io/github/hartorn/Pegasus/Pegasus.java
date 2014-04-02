@@ -23,7 +23,6 @@ public final class Pegasus extends JavaPlugin {
 	public void onEnable(){
 		this.getServer().getPluginManager().registerEvents(new PegasusListener(this), this);
 		registerEntities();
-
 		getLogger().info("Pegasus Plugin has been enabled.");
 	}
 
@@ -117,6 +116,7 @@ public final class Pegasus extends JavaPlugin {
 					else
 					{
 						player.sendMessage("It is not your pegasus...");
+						monture.eject();
 					}
 				}
 			}

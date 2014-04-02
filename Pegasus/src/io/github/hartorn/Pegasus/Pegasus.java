@@ -126,6 +126,7 @@ public final class Pegasus extends JavaPlugin {
 
 	private void setPegasusProperties(Horse monture, String args[], Player player, boolean isCreation)
 	{
+		boolean endIteration = false;
 		if(isCreation)
 		{
 			monture.setOwner(player);
@@ -139,45 +140,64 @@ public final class Pegasus extends JavaPlugin {
 		if(args!=null && args.length >0)
 		{
 			for(String argument : args){
+				endIteration = false;
 				if(argument.length()!=0)
 				{
 					if (argument.equalsIgnoreCase("WHITE_C"))
 					{
 						monture.setColor(Horse.Color.WHITE);
+						continue;
 					}
 					else{
 						for(Horse.Color color: Horse.Color.values()){
 							if(color.name().equalsIgnoreCase(argument))
 							{
 								monture.setColor(color);
+								endIteration = true;
 								break;
-							} 
+							}
+						}
+						if(endIteration)
+						{
+							continue;
 						}
 					}
 					if (argument.equalsIgnoreCase("WHITE_S"))
 					{
 						monture.setStyle(Horse.Style.WHITE);
+						continue;
 					}
 					else{
 						for(Horse.Style style: Horse.Style.values()){
 							if(style.name().equalsIgnoreCase(argument))
 							{
 								monture.setStyle(style);
+								endIteration = true;
 								break;
 							}
+						}
+						if(endIteration)
+						{
+							continue;
 						}
 					}
 					for(Horse.Variant variant: Horse.Variant.values()){
 						if(variant.name().equalsIgnoreCase(argument))
 						{
 							monture.setVariant(variant);
+							endIteration = true;
 							break;
 						}
+						if(endIteration)
+						{
+							continue;
+						}
 					}
-					monture.setCustomName(args[0]);
+					monture.setCustomName(argument);
 					monture.setCustomNameVisible(true);
 				}
 			}
 		}
+
 	}
 }                      

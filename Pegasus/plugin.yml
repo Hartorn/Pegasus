@@ -12,14 +12,15 @@ commands:
         permission: pegasus.customise
         permission-message: You're not allowed to customise pegasus.
 permissions:
-    pegasus.*:
+    pegasus.player:
         description: Gives access to all pegasus commands
+        default: true
         children:
             pegasus.create: true
             pegasus.customise: true
     pegasus.create:
         description: Allows you to create pegasus.
-        default: op
+        default: true
     pegasus.customise:
         description: Allows you to customise your own pegasus.
-        default: op
+        default: true

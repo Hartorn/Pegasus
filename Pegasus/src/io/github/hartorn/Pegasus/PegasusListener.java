@@ -8,6 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.HorseJumpEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.inventory.InventoryOpenEvent;
@@ -41,7 +42,7 @@ implements Listener
 			event.setCancelled(true);
 		}
 
-		if (event.getEntityType().compareTo(EntityType.PLAYER)==0 && (CraftEntity)Player.class.cast(event.getEntity()).getVehicle()!=null && ((CraftEntity)Player.class.cast(event.getEntity()).getVehicle()).getHandle() instanceof PegasusEntity)
+		if (event.getCause().compareTo(DamageCause.FALL) == 0 && event.getEntityType().compareTo(EntityType.PLAYER)==0 && (CraftEntity)Player.class.cast(event.getEntity()).getVehicle()!=null && ((CraftEntity)Player.class.cast(event.getEntity()).getVehicle()).getHandle() instanceof PegasusEntity)
 		{
 			event.setDamage(0);
 			event.setCancelled(true);
@@ -71,6 +72,24 @@ implements Listener
 			{
 				Player.class.cast(event.getPlayer()).sendMessage("This is not your Pegasus...");
 				event.setCancelled(true);
+			}
+		}
+	}
+	
+	@EventHandler(priority=EventPriority.MONITOR)
+	public void PegasusDeathEvent(EntityDeathEvent event) {
+		if (event.getEntity() != null && event.getEntity().getType().compareTo(EntityType.HORSE)==0 )
+		{
+			Horse monture = Horse.class.cast(event.getEntity());
+			if(monture.getOwner()!= null && monture.getOwner() instanceof Player)
+			{
+				Player player = Player.class.cast(monture.getOwner());
+				PegasusProperties properties = this.plugin.getPegasusProperties(player.getUniqueId());
+				if(properties!=null && monture.getUniqueId().compareTo(properties.getId())==0)
+				{
+					this.plugin.setPegasusPropertiesWithUUIDNull(player.getUniqueId(), monture);
+					//monture.getInventory().clear();
+				}
 			}
 		}
 	}

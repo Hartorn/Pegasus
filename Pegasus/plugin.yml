@@ -11,16 +11,24 @@ commands:
         description: Customise a pegasus
         permission: pegasus.customise
         permission-message: You're not allowed to customise pegasus.
+    pegasus-respawn:
+        description: Respawn your pegasus, if he is dead or lost.
+        permission: pegasus.respawn
+        permission-message: You're not allowed to respawn pegasus.
 permissions:
     pegasus.player:
-        description: Gives access to all pegasus commands
+        description: Gives access to all pegasus commands for players.
         default: true
         children:
-            pegasus.create: true
+            pegasus.create: true   
             pegasus.customise: true
+            pegasus.respawn: true
     pegasus.create:
         description: Allows you to create pegasus.
         default: true
     pegasus.customise:
         description: Allows you to customise your own pegasus.
+        default: true
+    pegasus.respawn:
+        description: Allows you to respawn your own pegasus.
         default: true

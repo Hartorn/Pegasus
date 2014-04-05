@@ -2,7 +2,6 @@ package io.github.hartorn.Pegasus;
 
 import net.minecraft.server.v1_7_R1.EntityHorse;
 import net.minecraft.server.v1_7_R1.EntityInsentient;
-
 import org.bukkit.entity.EntityType;
 
 public enum CustomEntityType {
@@ -42,5 +41,4 @@ public enum CustomEntityType {
     public Class<? extends EntityInsentient> getCustomClass(){
         return this.customClass;
     }
- 
 }

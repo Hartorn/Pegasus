@@ -1,96 +1,30 @@
 package io.github.hartorn.Pegasus;
 
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Map;
-
-import net.minecraft.server.v1_7_R1.BiomeBase;
-import net.minecraft.server.v1_7_R1.BiomeMeta;
-import net.minecraft.server.v1_7_R1.EntityTypes;
-
-import org.bukkit.Material;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.UUID;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_7_R1.entity.CraftEntity;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Pegasus extends JavaPlugin {
-	Player joueur;
-
+	HashMap<UUID, PegasusProperties> pegasusData;
+	private final String filename = "dataPegasus.json";
 	public void onEnable(){
 		this.getServer().getPluginManager().registerEvents(new PegasusListener(this), this);
-		registerEntities();
+		CustomEntityHelper.registerEntities();
+		PegasusDataHelper.initialisePegasusData(this, this.pegasusData);
 		getLogger().info("Pegasus Plugin has been enabled.");
 	}
 
 	public void onDisable(){
+		PegasusDataHelper.savePegasusData(this, this.pegasusData);
 		getLogger().info("Pegasus Plugin has been disabled.");
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static void registerEntities(){
-		for (CustomEntityType entity : CustomEntityType.values()){
-			try {
-				Field c = EntityTypes.class.getDeclaredField("c");
-				Field d = EntityTypes.class.getDeclaredField("d");
-				Field e = EntityTypes.class.getDeclaredField("e");
-				Field f = EntityTypes.class.getDeclaredField("f");
-				Field g = EntityTypes.class.getDeclaredField("g");
-
-				c.setAccessible(true);
-				d.setAccessible(true);
-				e.setAccessible(true);
-				f.setAccessible(true);
-				g.setAccessible(true);
-
-				Map cMap = (Map) c.get(null);
-				Map dMap = (Map) d.get(null);
-				Map eMap = (Map) e.get(null);
-				Map fMap = (Map) f.get(null);
-				Map gMap = (Map) g.get(null);
-
-				cMap.put(entity.getName(), entity.getCustomClass());
-				dMap.put(entity.getCustomClass(), entity.getName());
-				eMap.put(entity.getID(), entity.getCustomClass());
-				fMap.put(entity.getCustomClass(), entity.getID());
-				gMap.put(entity.getName(), entity.getID());
-
-				c.set(null, cMap);
-				d.set(null, dMap);
-				e.set(null, eMap);
-				f.set(null, fMap);
-				g.set(null, gMap);
-			} catch (Exception e){
-				e.printStackTrace();
-			}
-		}
-
-		for (BiomeBase biomeBase : BiomeBase.n()){
-			if (biomeBase == null){
-				break;
-			}
-
-			for (String field : new String[]{"as", "at", "au", "av"}){
-				try{
-					Field list = BiomeBase.class.getDeclaredField(field);
-					list.setAccessible(true);
-					List<BiomeMeta> mobList = (List<BiomeMeta>) list.get(biomeBase);
-
-					for (BiomeMeta meta : mobList){
-						for (CustomEntityType entity : CustomEntityType.values()){
-							if (entity.getNMSClass().equals(meta.b)){
-								meta.b = entity.getCustomClass();
-							}
-						}
-					}
-				}catch (Exception e){
-					e.printStackTrace();
-				}
-			}
-		}
 	}
 
 	public boolean onCommand(CommandSender sender, Command cmd, String CommandLabel, String[] args)
@@ -98,106 +32,124 @@ public final class Pegasus extends JavaPlugin {
 		if ((sender instanceof Player))
 		{
 			Player player = (Player)sender;
-			this.joueur = player;
 			if (cmd.getName().equalsIgnoreCase("pegasus-create") && player.hasPermission("pegasus.create")) {	
-				Horse monture = PegasusEntity.spawn(player);
-				setPegasusProperties(monture, args, player, true);
-				player.sendMessage("Your pegasus has spawned.");
+				UUID UUIDPlayer  = player.getUniqueId();
+				PegasusProperties properties = this.pegasusData.get(UUIDPlayer);
+				if(properties==null || properties.getId() == null)
+				{
+					Horse monture = PegasusEntity.spawn(player);
+					PegasusDataHelper.setPegasusProperties(monture, args, player, true);
+					this.pegasusData.put(UUIDPlayer, new PegasusProperties(monture));
+					player.sendMessage("Your pegasus has spawned.");
+				}
+				else
+				{
+					player.sendMessage("You already have a pegasus, use /pegasus-respawn to get it back.");
+				}
 			}
 			else if (cmd.getName().equalsIgnoreCase("pegasus-customise") && player.hasPermission("pegasus.customise")) {	
-				if(player.getVehicle()!=null && ((CraftEntity)player.getVehicle()).getHandle() instanceof PegasusEntity)
+				UUID UUIDPlayer  = player.getUniqueId();
+				PegasusProperties properties = this.pegasusData.get(UUIDPlayer);
+				if(properties!=null && properties.getId() != null)
 				{
-					Horse monture = Horse.class.cast(player.getVehicle());
-					if(monture.getOwner().equals(player))
+					if(player.getVehicle()!=null && player.getVehicle().getUniqueId().compareTo(properties.getId())==0)
 					{
-						setPegasusProperties(monture, args, player, false);
+						Horse monture = Horse.class.cast(player.getVehicle());
+						PegasusDataHelper.setPegasusProperties(monture, args, player, false);
+						this.pegasusData.put(UUIDPlayer, new PegasusProperties(monture));
 						player.sendMessage("Your pegasus has been customised.");
 					}
 					else
 					{
-						player.sendMessage("It is not your pegasus...");
-						monture.eject();
+						player.sendMessage("You have to be mounting your pegasus to customise it.");
 					}
+				}
+				else
+				{
+					player.sendMessage("You don't have any pegasus. Either respawn it, if yours is dead, or create one using /pegasus-create");
+				}
+			}
+			else if(cmd.getName().equalsIgnoreCase("pegasus-respawn") && player.hasPermission("pegasus.respawn"))
+			{
+				UUID UUIDPlayer  = player.getUniqueId();
+				PegasusProperties properties = this.pegasusData.get(UUIDPlayer);
+				if(properties==null)
+				{
+					player.sendMessage("You don't have any pegasus. You can create one using /pegasus-create");
+
+				}
+				else if( properties.getId()==null)
+				{
+					Horse monture = PegasusEntity.spawn(player);
+					PegasusDataHelper.setPegasusProperties(monture, player, properties);
+					this.pegasusData.put(UUIDPlayer, new PegasusProperties(monture));
+					player.sendMessage("Your pegasus has respawned.");
+				}
+				else
+				{
+					Collection<Horse> collection = player.getWorld().getEntitiesByClass(Horse.class);
+					for (Horse horse : collection)
+					{
+						if(horse.getUniqueId().compareTo(properties.getId())==0)
+						{
+							horse.teleport(player, TeleportCause.PLUGIN);
+							player.sendMessage("Your pegasus has been teleported to your location.");
+							return false;
+						}
+					}
+					UUID idWorld = player.getWorld().getUID();
+					for(World world :Bukkit.getWorlds())
+					{
+						if(idWorld.compareTo(world.getUID())!=0)
+						{
+							collection = world.getEntitiesByClass(Horse.class);
+							for (Horse horse : collection)
+							{
+								if(horse.getUniqueId().compareTo(properties.getId())==0)
+								{
+									horse.teleport(player, TeleportCause.PLUGIN);
+									player.sendMessage("Your pegasus has been teleported to your location.");
+									return false;
+								}
+							}
+						}
+					}
+					player.sendMessage("Your pegasus has not been found. Please report this.");
 				}
 			}
 		}
 		return false;
 	}
 
-	private void setPegasusProperties(Horse monture, String args[], Player player, boolean isCreation)
+	public PegasusProperties getPegasusProperties(UUID playerID)
 	{
-		boolean endIteration = false;
-		if(isCreation)
-		{
-			monture.setOwner(player);
-			monture.setCarryingChest(true);
-			monture.setCanPickupItems(true);
-			monture.getInventory().setSaddle(new ItemStack(Material.SADDLE));
-			monture.setRemoveWhenFarAway(false);
-			monture.setTamed(true);
-			monture.setJumpStrength(1);
-		}
-		if(args!=null && args.length >0)
-		{
-			for(String argument : args){
-				endIteration = false;
-				if(argument.length()!=0)
-				{
-					if (argument.equalsIgnoreCase("WHITE_C"))
-					{
-						monture.setColor(Horse.Color.WHITE);
-						continue;
-					}
-					else{
-						for(Horse.Color color: Horse.Color.values()){
-							if(color.name().equalsIgnoreCase(argument))
-							{
-								monture.setColor(color);
-								endIteration = true;
-								break;
-							}
-						}
-						if(endIteration)
-						{
-							continue;
-						}
-					}
-					if (argument.equalsIgnoreCase("WHITE_S"))
-					{
-						monture.setStyle(Horse.Style.WHITE);
-						continue;
-					}
-					else{
-						for(Horse.Style style: Horse.Style.values()){
-							if(style.name().equalsIgnoreCase(argument))
-							{
-								monture.setStyle(style);
-								endIteration = true;
-								break;
-							}
-						}
-						if(endIteration)
-						{
-							continue;
-						}
-					}
-					for(Horse.Variant variant: Horse.Variant.values()){
-						if(variant.name().equalsIgnoreCase(argument))
-						{
-							monture.setVariant(variant);
-							endIteration = true;
-							break;
-						}
-						if(endIteration)
-						{
-							continue;
-						}
-					}
-					monture.setCustomName(argument);
-					monture.setCustomNameVisible(true);
-				}
-			}
-		}
-
+		return this.pegasusData.get(playerID);
 	}
-}                      
+
+	public void setPegasusPropertiesWithUUIDNull(UUID playerID, Horse monture)
+	{ 
+		PegasusProperties properties = this.pegasusData.get(playerID);
+		//properties.setInventoryContents(monture.getInventory().getContents());
+		properties.setId(null);
+	}
+
+	public String getFilename() {
+		return filename;
+	}
+
+	//	private static class InventorySerializer implements JsonSerializer<ItemStack[]> {
+	//		@Override
+	//		public JsonElement serialize(ItemStack[] inventory, Type type, JsonSerializationContext context) {
+	//			int i;
+	//			JsonArray jsonInventory = new JsonArray();
+	//			Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
+	//
+	//			for(i=0; i<inventory.length; i++)
+	//			{
+	//				jsonInventory.add(gson.toJson(inventory[i], ItemStack.class));
+	//			}
+	//
+	//			return null;
+	//		}
+	//	}
+}

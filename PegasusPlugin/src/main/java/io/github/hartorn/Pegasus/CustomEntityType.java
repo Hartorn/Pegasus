@@ -11,9 +11,9 @@ public enum CustomEntityType
     PEGASUS("Horse", 100, EntityType.HORSE, EntityHorse.class, PegasusEntity.class);
 
     private Class<? extends EntityInsentient> customClass;
-    private EntityType                        entityType;
-    private int                               id;
-    private String                            name;
+    private EntityType entityType;
+    private int id;
+    private String name;
     private Class<? extends EntityInsentient> nmsClass;
 
     private CustomEntityType(final String name, final int id, final EntityType entityType, final Class<? extends EntityInsentient> nmsClass, final Class<? extends EntityInsentient> customClass)

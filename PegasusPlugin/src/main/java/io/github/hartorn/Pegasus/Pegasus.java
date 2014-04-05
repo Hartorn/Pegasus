@@ -15,7 +15,7 @@ public final class Pegasus extends JavaPlugin
         return Pegasus.instance;
     }
 
-    private final String                     filename = "dataPegasus.json";
+    private final String filename = "dataPegasus.json";
     private HashMap<UUID, PegasusProperties> pegasusData;
 
     public String getFilename()

@@ -10,12 +10,12 @@ public class PegasusProperties implements Serializable
 
     private static final long serialVersionUID = 2539166267530593666L;
 
-    private Horse.Color       color;
+    private Horse.Color color;
 
-    private UUID              id;
-    private String            name;
-    private Horse.Style       style;
-    private Horse.Variant     variant;
+    private UUID id;
+    private String name;
+    private Horse.Style style;
+    private Horse.Variant variant;
 
     // private ItemStack[] inventoryContents;
 

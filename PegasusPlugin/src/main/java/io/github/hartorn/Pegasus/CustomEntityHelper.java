@@ -4,9 +4,9 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.server.v1_7_R1.BiomeBase;
-import net.minecraft.server.v1_7_R1.BiomeMeta;
-import net.minecraft.server.v1_7_R1.EntityTypes;
+import net.minecraft.server.v1_7_R2.BiomeBase;
+import net.minecraft.server.v1_7_R2.BiomeMeta;
+import net.minecraft.server.v1_7_R2.EntityTypes;
 
 public class CustomEntityHelper
 {

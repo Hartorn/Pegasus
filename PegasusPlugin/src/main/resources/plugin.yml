@@ -15,6 +15,14 @@ commands:
         description: Respawn your pegasus, if he is dead or lost.
         permission: pegasus.respawn
         permission-message: You're not allowed to respawn pegasus.
+    pegasus-clear:
+        description: Kill all not registered Pegasus.
+        permission: pegasus.clear
+        permission-message: You're not allowed to kill all not registered Pegasus.
+    pegasus-forceclear:
+        description: Kill all Horses.
+        permission: pegasus.forceclear
+        permission-message: You're not allowed to kill all horses.
 permissions:
     pegasus.player:
         description: Gives access to all pegasus commands for players.
@@ -23,6 +31,12 @@ permissions:
             pegasus.create: true   
             pegasus.customise: true
             pegasus.respawn: true
+    pegasus.administration:
+        description: Gives access to all pegasus commands for administrators.
+        default: op
+        children:
+            pegasus.forceclear: true
+            pegasus.clear: true
     pegasus.create:
         description: Allows you to create pegasus.
         default: true
@@ -32,3 +46,9 @@ permissions:
     pegasus.respawn:
         description: Allows you to respawn your own pegasus.
         default: true
+    pegasus.clear:
+        description: Allows you to kill all not registered Pegasus.
+        default: op
+    pegasus.forceclear:
+        description: Allows you to kill all horses.
+        default: op

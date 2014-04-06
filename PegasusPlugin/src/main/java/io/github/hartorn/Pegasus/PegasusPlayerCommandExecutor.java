@@ -1,10 +1,7 @@
 package io.github.hartorn.Pegasus;
 
-import java.util.Collection;
 import java.util.UUID;
 
-import org.bukkit.Bukkit;
-import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -33,6 +30,7 @@ public class PegasusPlayerCommandExecutor implements CommandExecutor
                     final Horse monture = PegasusEntity.spawn(player);
                     PegasusDataHelper.setPegasusProperties(monture, args, player, true);
                     this.pegasusInstance.getPegasusData().put(UUIDPlayer, new PegasusProperties(monture));
+                    this.pegasusInstance.getPegasusMap().put(monture.getUniqueId(), UUIDPlayer);
                     player.sendMessage("Your pegasus has spawned.");
                 } else {
                     player.sendMessage("You already have a pegasus, use /pegasus-respawn to get it back.");
@@ -45,6 +43,8 @@ public class PegasusPlayerCommandExecutor implements CommandExecutor
                         final Horse monture = Horse.class.cast(player.getVehicle());
                         PegasusDataHelper.setPegasusProperties(monture, args, player, false);
                         this.pegasusInstance.getPegasusData().put(UUIDPlayer, new PegasusProperties(monture));
+                        // this.pegasusInstance.getPegasusMap().put(monture.getUniqueId(),
+                        // UUIDPlayer);
                         player.sendMessage("Your pegasus has been customised.");
                     } else {
                         player.sendMessage("You have to be mounting your pegasus to customise it.");
@@ -57,33 +57,19 @@ public class PegasusPlayerCommandExecutor implements CommandExecutor
                 final PegasusProperties properties = this.pegasusInstance.getPegasusData().get(UUIDPlayer);
                 if (properties == null) {
                     player.sendMessage("You don't have any pegasus. You can create one using /pegasus-create");
-
+                    return false;
                 } else if (properties.getId() == null) {
                     final Horse monture = PegasusEntity.spawn(player);
                     PegasusDataHelper.setPegasusProperties(monture, player, properties);
                     this.pegasusInstance.getPegasusData().put(UUIDPlayer, new PegasusProperties(monture));
+                    this.pegasusInstance.getPegasusMap().put(monture.getUniqueId(), UUIDPlayer);
                     player.sendMessage("Your pegasus has respawned.");
                 } else {
-                    Collection<Horse> collection = player.getWorld().getEntitiesByClass(Horse.class);
-                    for (final Horse horse : collection) {
-                        if (horse.getUniqueId().compareTo(properties.getId()) == 0) {
-                            horse.teleport(player, TeleportCause.PLUGIN);
-                            player.sendMessage("Your pegasus has been teleported to your location.");
-                            return false;
-                        }
-                    }
-                    final UUID idWorld = player.getWorld().getUID();
-                    for (final World world : Bukkit.getWorlds()) {
-                        if (idWorld.compareTo(world.getUID()) != 0) {
-                            collection = world.getEntitiesByClass(Horse.class);
-                            for (final Horse horse : collection) {
-                                if (horse.getUniqueId().compareTo(properties.getId()) == 0) {
-                                    horse.teleport(player, TeleportCause.PLUGIN);
-                                    player.sendMessage("Your pegasus has been teleported to your location.");
-                                    return false;
-                                }
-                            }
-                        }
+                    final Horse horse = PegasusDataHelper.getEntityByUUIDAndByClass(properties.getId(), player.getWorld().getUID(), Horse.class);
+                    if (horse != null) {
+                        horse.teleport(player, TeleportCause.PLUGIN);
+                        player.sendMessage("Your pegasus has been teleported to your location.");
+                        return false;
                     }
                     player.sendMessage("Your pegasus has not been found. Please report this.");
                 }

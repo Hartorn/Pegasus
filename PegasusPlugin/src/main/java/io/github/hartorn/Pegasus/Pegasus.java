@@ -3,7 +3,7 @@ package io.github.hartorn.Pegasus;
 import java.util.HashMap;
 import java.util.UUID;
 
-import org.bukkit.entity.Horse;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Pegasus extends JavaPlugin
@@ -15,13 +15,11 @@ public final class Pegasus extends JavaPlugin
         return Pegasus.instance;
     }
 
-    private final String filename = "dataPegasus.json";
-    private HashMap<UUID, PegasusProperties> pegasusData;
+    private final String filenameDataMap = "dataPegasus.json";
+    private final String filenameMap = "mapPegasus.json";
 
-    public String getFilename()
-    {
-        return this.filename;
-    }
+    private HashMap<UUID, PegasusProperties> pegasusData;
+    private HashMap<UUID, UUID> pegasusMap;
 
     public HashMap<UUID, PegasusProperties> getPegasusData()
     {
@@ -31,6 +29,20 @@ public final class Pegasus extends JavaPlugin
     public PegasusProperties getPegasusProperties(final UUID playerID)
     {
         return getPegasusData().get(playerID);
+    }
+
+    public UUID getPegasusOwnerUUID(final UUID pegasusID)
+    {
+        return getPegasusMap().get(pegasusID);
+    }
+
+    public Player getPegasusOwner(final UUID pegasusID)
+    {
+        if (pegasusID == null) {
+            return null;
+        }
+
+        return PegasusDataHelper.getPlayerByUUID(getPegasusOwnerUUID(pegasusID));
     }
 
     @Override
@@ -56,8 +68,13 @@ public final class Pegasus extends JavaPlugin
         getCommand("pegasus-customise").setExecutor(pegasusPlayerCommandExecutor);
         getCommand("pegasus-respawn").setExecutor(pegasusPlayerCommandExecutor);
 
+        final PegasusAdministratorCommandExecutor pegasusAdministratorCommandExecutor = new PegasusAdministratorCommandExecutor();
+        getCommand("pegasus-clear").setExecutor(pegasusAdministratorCommandExecutor);
+        getCommand("pegasus-forceclear").setExecutor(pegasusAdministratorCommandExecutor);
+
         // initialise pegasusData Hashmap
         PegasusDataHelper.initialisePegasusData(this);
+
         getLogger().info("Pegasus Plugin has been enabled.");
     }
 
@@ -66,10 +83,34 @@ public final class Pegasus extends JavaPlugin
         this.pegasusData = pegasusData;
     }
 
-    public void setPegasusPropertiesWithUUIDNull(final UUID playerID, final Horse monture)
+    public void setPegasusPropertiesWithUUIDNull(final UUID playerID)
     {
-        final PegasusProperties properties = getPegasusData().get(playerID);
-        // properties.setInventoryContents(monture.getInventory().getContents());
-        properties.setId(null);
+        if (playerID != null) {
+            final PegasusProperties properties = getPegasusData().get(playerID);
+            if (properties != null) {
+                // properties.setInventoryContents(monture.getInventory().getContents());
+                properties.setId(null);
+            }
+        }
+    }
+
+    public String getFilenameDataMap()
+    {
+        return this.filenameDataMap;
+    }
+
+    public String getFilenameMap()
+    {
+        return this.filenameMap;
+    }
+
+    public HashMap<UUID, UUID> getPegasusMap()
+    {
+        return this.pegasusMap;
+    }
+
+    public void setPegasusMap(final HashMap<UUID, UUID> pegasusMap)
+    {
+        this.pegasusMap = pegasusMap;
     }
 }

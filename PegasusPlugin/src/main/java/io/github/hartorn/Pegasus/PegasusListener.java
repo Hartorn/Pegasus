@@ -1,6 +1,8 @@
 package io.github.hartorn.Pegasus;
 
-import org.bukkit.craftbukkit.v1_7_R1.entity.CraftEntity;
+import java.util.UUID;
+
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
@@ -13,7 +15,6 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.HorseJumpEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
-import org.bukkit.inventory.HorseInventory;
 
 public class PegasusListener implements Listener
 {
@@ -27,10 +28,10 @@ public class PegasusListener implements Listener
     @EventHandler(priority = EventPriority.NORMAL)
     public void MountPegasusEventHandler(final VehicleEnterEvent event)
     {
-        if (event.getEntered() != null && event.getVehicle() != null && event.getEntered().getType().compareTo(EntityType.PLAYER) == 0 && event.getVehicle().getType().compareTo(EntityType.HORSE) == 0 && ((CraftEntity) event.getVehicle()).getHandle() instanceof PegasusEntity) {
+        if (event.getEntered().getType().compareTo(EntityType.PLAYER) == 0 && event.getVehicle().getType().compareTo(EntityType.HORSE) == 0) {
             final Player player = Player.class.cast(event.getEntered());
-            final Horse monture = Horse.class.cast(event.getVehicle());
-            if (!monture.getOwner().equals(player)) {
+            final UUID playerId = this.pegasusInstance.getPegasusOwnerUUID(event.getVehicle().getUniqueId());
+            if (playerId != null && player.getUniqueId().compareTo(playerId) != 0) {
                 player.sendMessage("This is not your Pegasus...");
                 event.setCancelled(true);
             }
@@ -40,9 +41,10 @@ public class PegasusListener implements Listener
     @EventHandler(priority = EventPriority.NORMAL)
     public void OpenPegasusInventoryEventHandler(final InventoryOpenEvent event)
     {
-        if (event.getPlayer() != null && event.getInventory() != null && event.getInventory() instanceof HorseInventory && ((CraftEntity) event.getInventory().getHolder()).getHandle() instanceof PegasusEntity) {
+        if (event.getInventory().getHolder() instanceof Horse) {
             final Horse monture = Horse.class.cast(event.getInventory().getHolder());
-            if (!monture.getOwner().equals(event.getPlayer())) {
+            final UUID playerId = this.pegasusInstance.getPegasusOwnerUUID(monture.getUniqueId());
+            if (playerId != null && event.getPlayer().getUniqueId().compareTo(playerId) != 0) {
                 Player.class.cast(event.getPlayer()).sendMessage("This is not your Pegasus...");
                 event.setCancelled(true);
             }
@@ -53,14 +55,14 @@ public class PegasusListener implements Listener
     public void PegasusDeathEvent(final EntityDeathEvent event)
     {
         if (event.getEntity() != null && event.getEntity().getType().compareTo(EntityType.HORSE) == 0) {
-            final Horse monture = Horse.class.cast(event.getEntity());
-            if (monture.getOwner() != null && monture.getOwner() instanceof Player) {
-                final Player player = Player.class.cast(monture.getOwner());
-                final PegasusProperties properties = this.pegasusInstance.getPegasusProperties(player.getUniqueId());
-                if (properties != null && monture.getUniqueId().compareTo(properties.getId()) == 0) {
-                    this.pegasusInstance.setPegasusPropertiesWithUUIDNull(player.getUniqueId(), monture);
-                    // monture.getInventory().clear();
-                }
+            final UUID montureId = event.getEntity().getUniqueId();
+            final Player player = this.pegasusInstance.getPegasusOwner(montureId);
+
+            if (player != null && montureId != null) {
+                this.pegasusInstance.setPegasusPropertiesWithUUIDNull(player.getUniqueId());
+                this.pegasusInstance.getPegasusMap().remove(montureId);
+                // monture.getInventory().clear();
+                player.sendMessage("Your pegasus died... You can get it back using /pegasus-respawn.");
             }
         }
     }
@@ -69,21 +71,30 @@ public class PegasusListener implements Listener
     public void PegasusFallEventHandler(final EntityDamageEvent event)
     {
 
-        if (event.getCause().compareTo(DamageCause.FALL) == 0 && event.getEntity() != null && event.getEntityType().compareTo(EntityType.HORSE) == 0 && ((CraftEntity) event.getEntity()).getHandle() instanceof PegasusEntity) {
+        if (event.getCause().compareTo(DamageCause.FALL) == 0 && this.pegasusInstance.getPegasusOwnerUUID(event.getEntity().getUniqueId()) != null) {
             event.setDamage(0);
             event.setCancelled(true);
+            return;
         }
 
-        if (event.getCause().compareTo(DamageCause.FALL) == 0 && event.getEntityType().compareTo(EntityType.PLAYER) == 0 && (CraftEntity) Player.class.cast(event.getEntity()).getVehicle() != null && ((CraftEntity) Player.class.cast(event.getEntity()).getVehicle()).getHandle() instanceof PegasusEntity) {
-            event.setDamage(0);
-            event.setCancelled(true);
+        if (event.getCause().compareTo(DamageCause.FALL) == 0 && event.getEntityType().compareTo(EntityType.PLAYER) == 0) {
+            final Player player = Player.class.cast(event.getEntity());
+            final Entity monture = player.getVehicle();
+            if (monture != null) {
+                final UUID playerId = this.pegasusInstance.getPegasusOwnerUUID(monture.getUniqueId());
+                if (playerId != null && playerId.compareTo(player.getUniqueId()) == 0) {
+                    event.setDamage(0);
+                    event.setCancelled(true);
+                }
+            }
+
         }
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void PegasusJumpEventHandler(final HorseJumpEvent event)
     {
-        if (((CraftEntity) event.getEntity()).getHandle() instanceof PegasusEntity) {
+        if (this.pegasusInstance.getPegasusMap().get(event.getEntity().getUniqueId()) != null) {
             event.setPower(1);
         }
     }

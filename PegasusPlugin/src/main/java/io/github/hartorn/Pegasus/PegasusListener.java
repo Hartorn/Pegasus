@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -68,16 +69,16 @@ public class PegasusListener implements Listener
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
-    public void PegasusFallEventHandler(final EntityDamageEvent event)
+    public void PegasusDamageHandler(final EntityDamageEvent event)
     {
-
+        // Cancel fall damage on the target, if it is registered as a Pegasus
         if (event.getCause().compareTo(DamageCause.FALL) == 0 && this.pegasusInstance.getPegasusOwnerUUID(event.getEntity().getUniqueId()) != null) {
             event.setDamage(0);
             event.setCancelled(true);
             return;
         }
-
-        if (event.getCause().compareTo(DamageCause.FALL) == 0 && event.getEntityType().compareTo(EntityType.PLAYER) == 0) {
+        // Cancel fall damage for the player, if he is mounting a Pegasus
+        else if (event.getCause().compareTo(DamageCause.FALL) == 0 && event.getEntityType().compareTo(EntityType.PLAYER) == 0) {
             final Player player = Player.class.cast(event.getEntity());
             final Entity monture = player.getVehicle();
             if (monture != null) {
@@ -85,9 +86,79 @@ public class PegasusListener implements Listener
                 if (playerId != null && playerId.compareTo(player.getUniqueId()) == 0) {
                     event.setDamage(0);
                     event.setCancelled(true);
+                    return;
                 }
             }
+        }
+        // Cancel damage coming from different sources, given the configuration
+        if (event.getEntity() != null && this.pegasusInstance.getPegasusOwnerUUID(event.getEntity().getUniqueId()) != null) {
+            final DamageCause cause = event.getCause();
+            boolean toCancel = false;
+            if (!ConfigHelper.isTakingDamage(this.pegasusInstance.getConfig())) {
+                toCancel = true;
+            }
+            switch (cause) {
+                case LAVA:
+                case FIRE_TICK:
+                case FIRE:
+                    if (!ConfigHelper.isTakingFireDamage(this.pegasusInstance.getConfig())) {
+                        toCancel = true;
+                    }
+                    break;
+                case DROWNING:
+                    if (!ConfigHelper.isTakingDrowningDamage(this.pegasusInstance.getConfig())) {
+                        toCancel = true;
+                    }
+                    break;
+                default:
+                    break;
+            }
+            event.setCancelled(toCancel);
+        }
+    }
 
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void PegasusDamageHandler(final EntityDamageByEntityEvent event)
+    {
+        if (event.getEntity() != null && this.pegasusInstance.getPegasusOwnerUUID(event.getEntity().getUniqueId()) != null) {
+            final EntityType type = event.getDamager().getType();
+            boolean toCancel = false;
+            switch (type) {
+                case PLAYER:
+                    if (!ConfigHelper.isTakingPlayerDamage(this.pegasusInstance.getConfig())) {
+                        toCancel = true;
+                    }
+                    break;
+                case BAT:
+                case BLAZE:
+                case CAVE_SPIDER:
+                case CREEPER:
+                case ENDERMAN:
+                case ENDER_DRAGON:
+                case GHAST:
+                case GIANT:
+                case IRON_GOLEM:
+                case MAGMA_CUBE:
+                case MUSHROOM_COW:
+                case OCELOT:
+                case PIG_ZOMBIE:
+                case SILVERFISH:
+                case SKELETON:
+                case SLIME:
+                case SPIDER:
+                case WITCH:
+                case WITHER:
+                case WITHER_SKULL:
+                case WOLF:
+                case ZOMBIE:
+                    if (!ConfigHelper.isTakingMonstersDamage(this.pegasusInstance.getConfig())) {
+                        toCancel = true;
+                    }
+                    break;
+                default:
+                    break;
+            }
+            event.setCancelled(toCancel);
         }
     }
 

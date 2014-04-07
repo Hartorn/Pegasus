@@ -75,6 +75,8 @@ public final class Pegasus extends JavaPlugin
         // initialise pegasusData Hashmap
         PegasusDataHelper.initialisePegasusData(this);
 
+        // initialise configuration
+        ConfigHelper.initialiseConfig(this);
         getLogger().info("Pegasus Plugin has been enabled.");
     }
 

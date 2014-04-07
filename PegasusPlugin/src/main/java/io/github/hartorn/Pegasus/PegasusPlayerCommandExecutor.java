@@ -28,7 +28,7 @@ public class PegasusPlayerCommandExecutor implements CommandExecutor
                 final PegasusProperties properties = this.pegasusInstance.getPegasusData().get(UUIDPlayer);
                 if (properties == null || properties.getId() == null) {
                     final Horse monture = PegasusEntity.spawn(player);
-                    PegasusDataHelper.setPegasusProperties(monture, args, player, true);
+                    PegasusDataHelper.setPegasusProperties(monture, args, player, true, this.pegasusInstance);
                     this.pegasusInstance.getPegasusData().put(UUIDPlayer, new PegasusProperties(monture));
                     this.pegasusInstance.getPegasusMap().put(monture.getUniqueId(), UUIDPlayer);
                     player.sendMessage("Your pegasus has spawned.");
@@ -41,7 +41,7 @@ public class PegasusPlayerCommandExecutor implements CommandExecutor
                 if (properties != null && properties.getId() != null) {
                     if (player.getVehicle() != null && player.getVehicle().getUniqueId().compareTo(properties.getId()) == 0) {
                         final Horse monture = Horse.class.cast(player.getVehicle());
-                        PegasusDataHelper.setPegasusProperties(monture, args, player, false);
+                        PegasusDataHelper.setPegasusProperties(monture, args, player, false, this.pegasusInstance);
                         this.pegasusInstance.getPegasusData().put(UUIDPlayer, new PegasusProperties(monture));
                         // this.pegasusInstance.getPegasusMap().put(monture.getUniqueId(),
                         // UUIDPlayer);
@@ -60,7 +60,7 @@ public class PegasusPlayerCommandExecutor implements CommandExecutor
                     return false;
                 } else if (properties.getId() == null) {
                     final Horse monture = PegasusEntity.spawn(player);
-                    PegasusDataHelper.setPegasusProperties(monture, player, properties);
+                    PegasusDataHelper.setPegasusProperties(monture, player, properties, this.pegasusInstance);
                     this.pegasusInstance.getPegasusData().put(UUIDPlayer, new PegasusProperties(monture));
                     this.pegasusInstance.getPegasusMap().put(monture.getUniqueId(), UUIDPlayer);
                     player.sendMessage("Your pegasus has respawned.");

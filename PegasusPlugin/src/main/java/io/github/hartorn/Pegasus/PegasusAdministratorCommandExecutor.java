@@ -24,13 +24,13 @@ public class PegasusAdministratorCommandExecutor implements CommandExecutor
         }
         int i;
         if (cmd.getName().equalsIgnoreCase("pegasus-clear") && (!isPlayer || player.hasPermission("pegasus.clear"))) {
-            i = PegasusDataHelper.KillPegasus(this.pegasusInstance);
+            i = PegasusDataHelper.killPegasus(this.pegasusInstance);
             if (isPlayer) {
                 player.sendMessage("Cleaning done. Number of killed Pegasus : " + i);
             }
             this.pegasusInstance.getLogger().info("Cleaning done. Number of killed Pegasus : " + i);
         } else if (cmd.getName().equalsIgnoreCase("pegasus-forceclear") && (!isPlayer || player.hasPermission("pegasus.forceclear"))) {
-            i = PegasusDataHelper.KillPegasus(this.pegasusInstance, true);
+            i = PegasusDataHelper.killPegasus(this.pegasusInstance, true);
             if (isPlayer) {
                 player.sendMessage("Cleaning done. Number of killed horse : " + i);
             }

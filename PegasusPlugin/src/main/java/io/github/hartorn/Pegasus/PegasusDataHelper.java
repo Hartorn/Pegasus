@@ -101,15 +101,19 @@ public class PegasusDataHelper
         }
     }
 
-    public static void setPegasusProperties(final Horse monture, final Player player, final PegasusProperties properties)
+    public static void setPegasusProperties(final Horse monture, final Player player, final PegasusProperties properties, final Pegasus plugin)
     {
+
+        monture.setCarryingChest(ConfigHelper.hasInventory(plugin.getConfig()));
+        monture.setCanPickupItems(ConfigHelper.canPickUpItems(plugin.getConfig()));
+        monture.setJumpStrength(ConfigHelper.getJumpStrength(plugin.getConfig()));
+        monture.setMaxHealth(ConfigHelper.getMaxHealth(plugin.getConfig()));
+        monture.getInventory().setArmor(ConfigHelper.getArmor(plugin.getConfig()));
+
         monture.setOwner(player);
-        monture.setCarryingChest(true);
-        monture.setCanPickupItems(true);
         monture.getInventory().setSaddle(new ItemStack(Material.SADDLE));
         monture.setRemoveWhenFarAway(false);
         monture.setTamed(true);
-        monture.setJumpStrength(1);
         monture.setBreed(false);
         if (properties.getName() != null) {
             monture.setCustomName(properties.getName());
@@ -124,17 +128,21 @@ public class PegasusDataHelper
         // monture.getInventory().setSaddle(new ItemStack(Material.SADDLE));
     }
 
-    public static void setPegasusProperties(final Horse monture, final String args[], final Player player, final boolean isCreation)
+    public static void setPegasusProperties(final Horse monture, final String args[], final Player player, final boolean isCreation, final Pegasus plugin)
     {
         boolean endIteration = false;
         if (isCreation) {
+            monture.setCarryingChest(ConfigHelper.hasInventory(plugin.getConfig()));
+            monture.setCanPickupItems(ConfigHelper.canPickUpItems(plugin.getConfig()));
+            monture.setJumpStrength(ConfigHelper.getJumpStrength(plugin.getConfig()));
+            monture.setMaxHealth(ConfigHelper.getMaxHealth(plugin.getConfig()));
+            monture.getInventory().setArmor(ConfigHelper.getArmor(plugin.getConfig()));
+
             monture.setOwner(player);
-            monture.setCarryingChest(true);
-            monture.setCanPickupItems(true);
             monture.getInventory().setSaddle(new ItemStack(Material.SADDLE));
             monture.setRemoveWhenFarAway(false);
             monture.setTamed(true);
-            monture.setJumpStrength(1);
+
             monture.setBreed(false);
         }
         if (args != null && args.length > 0) {
@@ -262,12 +270,12 @@ public class PegasusDataHelper
         return null;
     }
 
-    public static int KillPegasus(final Pegasus plugin)
+    public static int killPegasus(final Pegasus plugin)
     {
-        return PegasusDataHelper.KillPegasus(plugin, false);
+        return PegasusDataHelper.killPegasus(plugin, false);
     }
 
-    public static int KillPegasus(final Pegasus plugin, final boolean deleteAll)
+    public static int killPegasus(final Pegasus plugin, final boolean deleteAll)
     {
         int i = 0;
         for (final World world : Bukkit.getWorlds()) {

@@ -14,6 +14,8 @@ public class ConfigHelper
         builder.append("Pegasus.caracteristics.armor accept this values :NONE, IRON, GOLD, DIAMOND.\n");
         builder.append("Pegasus.caracteristics.hasinventory defines if the pegasus got an inventory.\n");
         builder.append("Pegasus.caracteristics.canpickupitems defines if the pegasus can pick up items.\n");
+        builder.append("Pegasus.caracteristics.maxhealth is in game between 15 and 30.\n");
+        builder.append("Pegasus.caracteristics.must be between 0 and 2. At 0, you won't jump or fly anymore.\n");
 
         builder.append("Pegasus.damage defines from which sources the pegasus can take damage.\n");
         builder.append("Pegasus.damage.none makes Pegasus invulnerable.\n");

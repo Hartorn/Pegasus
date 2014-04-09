@@ -111,7 +111,6 @@ public class PegasusDataHelper
         monture.getInventory().setArmor(ConfigHelper.getArmor(plugin.getConfig()));
 
         monture.setOwner(player);
-        monture.getInventory().setSaddle(new ItemStack(Material.SADDLE));
         monture.setRemoveWhenFarAway(false);
         monture.setTamed(true);
         monture.setBreed(false);
@@ -123,9 +122,7 @@ public class PegasusDataHelper
         monture.setVariant(properties.getVariant());
         monture.setStyle(properties.getStyle());
 
-        // monture.getInventory().clear();
-        // monture.getInventory().setContents(properties.getInventoryContents());
-        // monture.getInventory().setSaddle(new ItemStack(Material.SADDLE));
+        InventorySerializer.setInventoryContent(monture.getInventory(), properties.getInventoryContents());
     }
 
     public static void setPegasusProperties(final Horse monture, final String args[], final Player player, final boolean isCreation, final Pegasus plugin)
@@ -142,7 +139,6 @@ public class PegasusDataHelper
             monture.getInventory().setSaddle(new ItemStack(Material.SADDLE));
             monture.setRemoveWhenFarAway(false);
             monture.setTamed(true);
-
             monture.setBreed(false);
         }
         if (args != null && args.length > 0) {

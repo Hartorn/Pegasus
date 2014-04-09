@@ -43,8 +43,6 @@ public class PegasusPlayerCommandExecutor implements CommandExecutor
                         final Horse monture = Horse.class.cast(player.getVehicle());
                         PegasusDataHelper.setPegasusProperties(monture, args, player, false, this.pegasusInstance);
                         this.pegasusInstance.getPegasusData().put(UUIDPlayer, new PegasusProperties(monture));
-                        // this.pegasusInstance.getPegasusMap().put(monture.getUniqueId(),
-                        // UUIDPlayer);
                         player.sendMessage("Your pegasus has been customised.");
                     } else {
                         player.sendMessage("You have to be mounting your pegasus to customise it.");

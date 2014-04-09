@@ -62,7 +62,16 @@ public class PegasusListener implements Listener
             if (player != null && montureId != null) {
                 this.pegasusInstance.setPegasusPropertiesWithUUIDNull(player.getUniqueId());
                 this.pegasusInstance.getPegasusMap().remove(montureId);
-                // monture.getInventory().clear();
+                if (event.getEntity().getType().equals(EntityType.HORSE)) {
+                    final Horse monture = Horse.class.cast(event.getEntity());
+                    if (monture.isCarryingChest() && ConfigHelper.hasInventory(this.pegasusInstance.getConfig()) && ConfigHelper.isKeepingInventoryOnDeath(this.pegasusInstance.getConfig())) {
+                        this.pegasusInstance.getPegasusProperties(player.getUniqueId()).setInventoryContents(InventorySerializer.getSerializedInventory(monture.getInventory()));
+                        monture.getInventory().clear();
+                        monture.setCarryingChest(false);
+                        event.setDroppedExp(0);
+                        event.getDrops().clear();
+                    }
+                }
                 player.sendMessage("Your pegasus died... You can get it back using /pegasus-respawn.");
             }
         }

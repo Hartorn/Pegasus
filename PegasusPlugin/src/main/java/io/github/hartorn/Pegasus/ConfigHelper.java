@@ -16,9 +16,10 @@ public class ConfigHelper
         builder.append("Pegasus.caracteristics.canpickupitems defines if the pegasus can pick up items.\n");
         builder.append("Pegasus.caracteristics.maxhealth is in game between 15 and 30.\n");
         builder.append("Pegasus.caracteristics.must be between 0 and 2. At 0, you won't jump or fly anymore.\n");
+        builder.append("Pegasus.caracteristics.keepinventoryondeath defines it the pegasus will keep the inventory on death, and still have it on respawn.\n");
 
         builder.append("Pegasus.damage defines from which sources the pegasus can take damage.\n");
-        builder.append("Pegasus.damage.none makes Pegasus invulnerable.\n");
+        builder.append("Pegasus.damage.none:true makes Pegasus invulnerable.\n");
 
         final FileConfiguration config = plugin.getConfig();
         config.options().header(builder.toString());
@@ -26,12 +27,13 @@ public class ConfigHelper
         config.addDefault("pegasus.caracteristics.jumpstrength", 1.0D);
         config.addDefault("pegasus.caracteristics.armor", "NONE");
         config.addDefault("pegasus.caracteristics.hasinventory", true);
+        config.addDefault("pegasus.caracteristics.keepinventoryondeath", true);
         config.addDefault("pegasus.caracteristics.canpickupitems", true);
 
         config.addDefault("pegasus.damage.none", false);
         config.addDefault("pegasus.damage.fire", true);
         config.addDefault("pegasus.damage.drowning", true);
-        config.addDefault("pegasus.damage.player", true);
+        config.addDefault("pegasus.damage.players", true);
         config.addDefault("pegasus.damage.monsters", true);
 
         config.options().copyDefaults(true);
@@ -77,7 +79,12 @@ public class ConfigHelper
 
     public static boolean hasInventory(final FileConfiguration config)
     {
-        return config.getBoolean("pegasus.caracteristics.inventory");
+        return config.getBoolean("pegasus.caracteristics.hasinventory");
+    }
+
+    public static boolean isKeepingInventoryOnDeath(final FileConfiguration config)
+    {
+        return config.getBoolean("pegasus.caracteristics.keepinventoryondeath");
     }
 
     public static boolean canPickUpItems(final FileConfiguration config)

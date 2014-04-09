@@ -271,6 +271,24 @@ public class PegasusDataHelper
         return PegasusDataHelper.killPegasus(plugin, false);
     }
 
+    public static int killRegisteredPegasus(final Pegasus plugin)
+    {
+        int i = 0;
+        for (final World world : Bukkit.getWorlds()) {
+            final Collection<Horse> collection = world.getEntitiesByClass(Horse.class);
+            for (final Horse horse : collection) {
+                if (plugin.getPegasusOwnerUUID(horse.getUniqueId()) != null) {
+                    final UUID playerUUID = plugin.getPegasusOwnerUUID(horse.getUniqueId());
+                    plugin.getPegasusMap().remove(horse.getUniqueId());
+                    plugin.setPegasusPropertiesWithUUIDNull(playerUUID);
+                    horse.remove();
+                    i++;
+                }
+            }
+        }
+        return i;
+    }
+
     public static int killPegasus(final Pegasus plugin, final boolean deleteAll)
     {
         int i = 0;
@@ -278,7 +296,7 @@ public class PegasusDataHelper
             final Collection<Horse> collection = world.getEntitiesByClass(Horse.class);
             for (final Horse horse : collection) {
                 if (deleteAll || (((CraftEntity) horse).getHandle() instanceof PegasusEntity && plugin.getPegasusOwnerUUID(horse.getUniqueId()) == null)) {
-                    horse.setHealth(0);
+                    horse.remove();
                     i++;
                 }
             }

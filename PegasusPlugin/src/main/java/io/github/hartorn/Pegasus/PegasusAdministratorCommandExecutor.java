@@ -35,6 +35,12 @@ public class PegasusAdministratorCommandExecutor implements CommandExecutor
                 player.sendMessage("Cleaning done. Number of killed horse : " + i);
             }
             this.pegasusInstance.getLogger().info("Cleaning done. Number of killed horse : " + i);
+        } else if (cmd.getName().equalsIgnoreCase("pegasus-clean") && (!isPlayer || player.hasPermission("pegasus.clean"))) {
+            i = PegasusDataHelper.killRegisteredPegasus(this.pegasusInstance);
+            if (isPlayer) {
+                player.sendMessage("Cleaning done. Number of killed Pegasus : " + i);
+            }
+            this.pegasusInstance.getLogger().info("Cleaning done. Number of killed Pegasus : " + i);
         }
         return false;
     }

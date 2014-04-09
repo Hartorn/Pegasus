@@ -70,6 +70,8 @@ public final class Pegasus extends JavaPlugin
 
         final PegasusAdministratorCommandExecutor pegasusAdministratorCommandExecutor = new PegasusAdministratorCommandExecutor();
         getCommand("pegasus-clear").setExecutor(pegasusAdministratorCommandExecutor);
+        getCommand("pegasus-clean").setExecutor(pegasusAdministratorCommandExecutor);
+
         getCommand("pegasus-forceclear").setExecutor(pegasusAdministratorCommandExecutor);
 
         // initialise pegasusData Hashmap

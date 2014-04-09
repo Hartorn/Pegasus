@@ -17,7 +17,7 @@ public class InventorySerializer
         }
         final ArrayList<Map<String, Object>> serializedInventory = new ArrayList<Map<String, Object>>();
         for (final ItemStack item : inventory.getContents()) {
-            if (item != null) {
+            if (item != null && !item.getType().equals(Material.ENCHANTED_BOOK)) {
                 serializedInventory.add(item.serialize());
             }
         }

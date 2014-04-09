@@ -1,6 +1,6 @@
 name: Pegasus
 main: io.github.hartorn.Pegasus.Pegasus
-version: 0.1 DEV
+version: 1.0.1
 author: Hartorn
 commands: 
     pegasus-create:
@@ -19,6 +19,10 @@ commands:
         description: Kill all not registered Pegasus.
         permission: pegasus.clear
         permission-message: You're not allowed to kill all not registered Pegasus.
+    pegasus-clean:
+        description: Kill all registered Pegasus.
+        permission: pegasus.clean
+        permission-message: You're not allowed to kill all registered Pegasus.
     pegasus-forceclear:
         description: Kill all Horses.
         permission: pegasus.forceclear
@@ -37,6 +41,7 @@ permissions:
         children:
             pegasus.forceclear: true
             pegasus.clear: true
+            pegasus.clean: true
     pegasus.create:
         description: Allows you to create pegasus.
         default: true
@@ -48,6 +53,9 @@ permissions:
         default: true
     pegasus.clear:
         description: Allows you to kill all not registered Pegasus.
+        default: op
+    pegasus.clean:
+        description: Allows you to kill all registered Pegasus.
         default: op
     pegasus.forceclear:
         description: Allows you to kill all horses.

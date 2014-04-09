@@ -71,7 +71,6 @@ public final class Pegasus extends JavaPlugin
         final PegasusAdministratorCommandExecutor pegasusAdministratorCommandExecutor = new PegasusAdministratorCommandExecutor();
         getCommand("pegasus-clear").setExecutor(pegasusAdministratorCommandExecutor);
         getCommand("pegasus-clean").setExecutor(pegasusAdministratorCommandExecutor);
-
         getCommand("pegasus-forceclear").setExecutor(pegasusAdministratorCommandExecutor);
 
         // initialise pegasusData Hashmap
@@ -92,7 +91,6 @@ public final class Pegasus extends JavaPlugin
         if (playerID != null) {
             final PegasusProperties properties = getPegasusData().get(playerID);
             if (properties != null) {
-                // properties.setInventoryContents(monture.getInventory().getContents());
                 properties.setId(null);
             }
         }

@@ -11,17 +11,16 @@ import java.util.HashMap;
 import java.util.UUID;
 import java.util.logging.Level;
 
-import net.minecraft.util.com.google.gson.Gson;
-import net.minecraft.util.com.google.gson.GsonBuilder;
-import net.minecraft.util.com.google.gson.reflect.TypeToken;
-import net.minecraft.util.com.google.gson.stream.JsonReader;
-import net.minecraft.util.com.google.gson.stream.JsonWriter;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_7_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
+import org.bukkit.craftbukkit.libs.com.google.gson.GsonBuilder;
+import org.bukkit.craftbukkit.libs.com.google.gson.reflect.TypeToken;
+import org.bukkit.craftbukkit.libs.com.google.gson.stream.JsonReader;
+import org.bukkit.craftbukkit.libs.com.google.gson.stream.JsonWriter;
+import org.bukkit.craftbukkit.v1_6_R3.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;

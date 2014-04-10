@@ -1,15 +1,15 @@
 package io.github.hartorn.Pegasus;
 
-import net.minecraft.server.v1_7_R1.EntityHorse;
-import net.minecraft.server.v1_7_R1.EntityLiving;
-import net.minecraft.server.v1_7_R1.GenericAttributes;
-import net.minecraft.server.v1_7_R1.MathHelper;
-import net.minecraft.server.v1_7_R1.MobEffectList;
-import net.minecraft.server.v1_7_R1.World;
+import net.minecraft.server.v1_6_R3.EntityHorse;
+import net.minecraft.server.v1_6_R3.EntityLiving;
+import net.minecraft.server.v1_6_R3.GenericAttributes;
+import net.minecraft.server.v1_6_R3.MathHelper;
+import net.minecraft.server.v1_6_R3.MobEffectList;
+import net.minecraft.server.v1_6_R3.World;
 
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_7_R1.entity.CraftHorse;
+import org.bukkit.craftbukkit.v1_6_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_6_R3.entity.CraftHorse;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -32,11 +32,11 @@ public class PegasusEntity extends EntityHorse
         super(world);
     }
 
-    // Version for craftbukkit 1.7.2-R0.3
+    // Version for craftbukkit 1.6.4-R2.0
     @Override
     public void e(float f, float f1)
     {
-        if ((this.passenger != null) && ((this.passenger instanceof EntityLiving)) && (cs())) {
+        if ((this.passenger != null) && (co())) {
             this.lastYaw = (this.yaw = this.passenger.yaw);
             this.pitch = (this.passenger.pitch * 0.5F);
             b(this.yaw, this.pitch);
@@ -48,22 +48,22 @@ public class PegasusEntity extends EntityHorse
                 // this.bP = 0;
             }
 
-            // if ((this.onGround) && (this.bt == 0.0F) && (cl()) && (!this.bI))
+            // if ((this.onGround) && (this.bt == 0.0F) && (ch()) && (!this.bI))
             // {
-            if ((this.bt == 0.0F) && (cl())) {
+            if ((this.bt == 0.0F) && (ch())) {
                 f = 0.0F;
                 f1 = 0.0F;
             }
 
-            // if ((this.bt > 0.0F) && (!ch()) && (this.onGround)) {
-            if ((this.bt > 0.0F) && (!ch())) {
+            // if ((this.bt > 0.0F) && (!cd()) && (this.onGround)) {
+            if ((this.bt > 0.0F) && (!cd())) {
                 this.motY = (getJumpStrength() * this.bt);
                 if (hasEffect(MobEffectList.JUMP)) {
                     this.motY += (getEffect(MobEffectList.JUMP).getAmplifier() + 1) * 0.1F;
                 }
 
                 j(true);
-                this.am = true;
+                this.an = true;
                 if (f1 > 0.0F) {
                     final float f2 = MathHelper.sin(this.yaw * 3.141593F / 180.0F);
                     final float f3 = MathHelper.cos(this.yaw * 3.141593F / 180.0F);
@@ -76,8 +76,8 @@ public class PegasusEntity extends EntityHorse
                 this.bt = 0.0F;
             }
 
-            this.X = 1.0F;
-            this.aR = (bl() * 0.1F);
+            this.Y = 1.0F;
+            this.aR = (bg() * 0.1F);
             if (!this.world.isStatic) {
                 i((float) getAttributeInstance(GenericAttributes.d).getValue());
                 super.e(f, f1);
@@ -100,9 +100,10 @@ public class PegasusEntity extends EntityHorse
             this.aG += (f4 - this.aG) * 0.4F;
             this.aH += this.aG;
         } else {
-            this.X = 0.5F;
+            this.Y = 0.5F;
             this.aR = 0.02F;
             super.e(f, f1);
         }
     }
+
 }

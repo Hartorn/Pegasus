@@ -28,12 +28,20 @@ public final class Pegasus extends JavaPlugin
 
     public PegasusProperties getPegasusProperties(final UUID playerID)
     {
-        return getPegasusData().get(playerID);
+        return this.getPegasusData().get(playerID);
+    }
+
+    public PegasusProperties getPegasusPropertiesByPegasusUUID(final UUID pegasusID)
+    {
+        if (pegasusID == null) {
+            return null;
+        }
+        return this.getPegasusProperties(this.getPegasusOwnerUUID(pegasusID));
     }
 
     public UUID getPegasusOwnerUUID(final UUID pegasusID)
     {
-        return getPegasusMap().get(pegasusID);
+        return this.getPegasusMap().get(pegasusID);
     }
 
     public Player getPegasusOwner(final UUID pegasusID)
@@ -42,14 +50,14 @@ public final class Pegasus extends JavaPlugin
             return null;
         }
 
-        return PegasusDataHelper.getPlayerByUUID(getPegasusOwnerUUID(pegasusID));
+        return PegasusDataHelper.getPlayerByUUID(this.getPegasusOwnerUUID(pegasusID));
     }
 
     @Override
     public void onDisable()
     {
         PegasusDataHelper.savePegasusData(this);
-        getLogger().info("Pegasus Plugin has been disabled.");
+        this.getLogger().info("Pegasus Plugin has been disabled.");
     }
 
     @Override
@@ -60,25 +68,25 @@ public final class Pegasus extends JavaPlugin
         CustomEntityHelper.registerEntities();
 
         // register listeners
-        getServer().getPluginManager().registerEvents(new PegasusListener(), this);
+        this.getServer().getPluginManager().registerEvents(new PegasusListener(), this);
 
         // register command executors
         final PegasusPlayerCommandExecutor pegasusPlayerCommandExecutor = new PegasusPlayerCommandExecutor();
-        getCommand("pegasus-create").setExecutor(pegasusPlayerCommandExecutor);
-        getCommand("pegasus-customise").setExecutor(pegasusPlayerCommandExecutor);
-        getCommand("pegasus-respawn").setExecutor(pegasusPlayerCommandExecutor);
+        this.getCommand("pegasus-create").setExecutor(pegasusPlayerCommandExecutor);
+        this.getCommand("pegasus-customise").setExecutor(pegasusPlayerCommandExecutor);
+        this.getCommand("pegasus-respawn").setExecutor(pegasusPlayerCommandExecutor);
 
         final PegasusAdministratorCommandExecutor pegasusAdministratorCommandExecutor = new PegasusAdministratorCommandExecutor();
-        getCommand("pegasus-clear").setExecutor(pegasusAdministratorCommandExecutor);
-        getCommand("pegasus-clean").setExecutor(pegasusAdministratorCommandExecutor);
-        getCommand("pegasus-forceclear").setExecutor(pegasusAdministratorCommandExecutor);
+        this.getCommand("pegasus-clear").setExecutor(pegasusAdministratorCommandExecutor);
+        this.getCommand("pegasus-clean").setExecutor(pegasusAdministratorCommandExecutor);
+        this.getCommand("pegasus-forceclear").setExecutor(pegasusAdministratorCommandExecutor);
 
         // initialise pegasusData Hashmap
         PegasusDataHelper.initialisePegasusData(this);
 
         // initialise configuration
         ConfigHelper.initialiseConfig(this);
-        getLogger().info("Pegasus Plugin has been enabled.");
+        this.getLogger().info("Pegasus Plugin has been enabled.");
     }
 
     public void setPegasusData(final HashMap<UUID, PegasusProperties> pegasusData)
@@ -86,10 +94,23 @@ public final class Pegasus extends JavaPlugin
         this.pegasusData = pegasusData;
     }
 
+    public void removePegasusByUUID(final UUID pegasusID)
+    {
+        final UUID playerID = this.getPegasusOwnerUUID(pegasusID);
+        this.getPegasusMap().remove(playerID);
+        this.setPegasusPropertiesWithUUIDNull(playerID);
+    }
+
+    public void removePegasusByOwnerUUID(final UUID ownerID)
+    {
+        this.getPegasusMap().remove(ownerID);
+        this.setPegasusPropertiesWithUUIDNull(ownerID);
+    }
+
     public void setPegasusPropertiesWithUUIDNull(final UUID playerID)
     {
         if (playerID != null) {
-            final PegasusProperties properties = getPegasusData().get(playerID);
+            final PegasusProperties properties = this.getPegasusData().get(playerID);
             if (properties != null) {
                 properties.setId(null);
             }

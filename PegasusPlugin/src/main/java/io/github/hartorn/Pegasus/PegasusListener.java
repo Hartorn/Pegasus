@@ -2,6 +2,7 @@ package io.github.hartorn.Pegasus;
 
 import java.util.UUID;
 
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
@@ -15,7 +16,13 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.HorseJumpEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.player.PlayerKickEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
+import org.bukkit.event.world.ChunkUnloadEvent;
+import org.bukkit.event.world.WorldUnloadEvent;
+import org.bukkit.inventory.ItemStack;
 
 public class PegasusListener implements Listener
 {
@@ -24,6 +31,38 @@ public class PegasusListener implements Listener
     public PegasusListener()
     {
         this.pegasusInstance = Pegasus.getInstance();
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void SpawnPegasusOnPlayerJoining(final PlayerRespawnEvent event)
+    {
+        PegasusDataHelper.respawnPegasusByOwnerId(event.getPlayer(), this.pegasusInstance);
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void UnloadPegasusOnPlayerQuiting(final PlayerQuitEvent event)
+    {
+        PegasusDataHelper.unloadPegasusByOwnerId(event.getPlayer().getUniqueId(), this.pegasusInstance);
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void UnloadPegasusOnPlayerKicked(final PlayerKickEvent event)
+    {
+        PegasusDataHelper.unloadPegasusByOwnerId(event.getPlayer().getUniqueId(), this.pegasusInstance);
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void UnloadPegasusOnWorldUnloading(final WorldUnloadEvent event)
+    {
+        PegasusDataHelper.unloadPegasusInList(event.getWorld().getEntities(), this.pegasusInstance);
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void UnloadPegasusOnChunkUnload(final ChunkUnloadEvent event)
+    {
+        if (event.getChunk() != null) {
+            PegasusDataHelper.unloadPegasusInArray(event.getChunk().getEntities(), this.pegasusInstance);
+        }
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
@@ -60,17 +99,18 @@ public class PegasusListener implements Listener
             final Player player = this.pegasusInstance.getPegasusOwner(montureId);
 
             if (player != null && montureId != null) {
-                this.pegasusInstance.setPegasusPropertiesWithUUIDNull(player.getUniqueId());
-                this.pegasusInstance.getPegasusMap().remove(montureId);
+                this.pegasusInstance.removePegasusByOwnerUUID(player.getUniqueId());
                 if (event.getEntity().getType().equals(EntityType.HORSE)) {
                     final Horse monture = Horse.class.cast(event.getEntity());
-                    if (monture.isCarryingChest() && ConfigHelper.hasInventory(this.pegasusInstance.getConfig()) && ConfigHelper.isKeepingInventoryOnDeath(this.pegasusInstance.getConfig())) {
+                    if (monture.getInventory() != null && ConfigHelper.hasInventory(this.pegasusInstance.getConfig()) && ConfigHelper.isKeepingInventoryOnDeath(this.pegasusInstance.getConfig())) {
                         this.pegasusInstance.getPegasusProperties(player.getUniqueId()).setInventoryContents(InventorySerializer.getSerializedInventory(monture.getInventory()));
                         monture.getInventory().clear();
                         monture.setCarryingChest(false);
-                        event.setDroppedExp(0);
                         event.getDrops().clear();
                     }
+                    event.setDroppedExp(0);
+                    monture.getInventory().setSaddle(null);
+                    event.getDrops().remove(new ItemStack(Material.SADDLE));
                 }
                 player.sendMessage("Your pegasus died... You can get it back using /pegasus-respawn.");
             }
@@ -105,22 +145,23 @@ public class PegasusListener implements Listener
             boolean toCancel = false;
             if (!ConfigHelper.isTakingDamage(this.pegasusInstance.getConfig())) {
                 toCancel = true;
-            }
-            switch (cause) {
-                case LAVA:
-                case FIRE_TICK:
-                case FIRE:
-                    if (!ConfigHelper.isTakingFireDamage(this.pegasusInstance.getConfig())) {
-                        toCancel = true;
-                    }
-                    break;
-                case DROWNING:
-                    if (!ConfigHelper.isTakingDrowningDamage(this.pegasusInstance.getConfig())) {
-                        toCancel = true;
-                    }
-                    break;
-                default:
-                    break;
+            } else {
+                switch (cause) {
+                    case LAVA:
+                    case FIRE_TICK:
+                    case FIRE:
+                        if (!ConfigHelper.isTakingFireDamage(this.pegasusInstance.getConfig())) {
+                            toCancel = true;
+                        }
+                        break;
+                    case DROWNING:
+                        if (!ConfigHelper.isTakingDrowningDamage(this.pegasusInstance.getConfig())) {
+                            toCancel = true;
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
             event.setCancelled(toCancel);
         }
@@ -130,42 +171,47 @@ public class PegasusListener implements Listener
     public void PegasusDamageHandler(final EntityDamageByEntityEvent event)
     {
         if (event.getEntity() != null && this.pegasusInstance.getPegasusOwnerUUID(event.getEntity().getUniqueId()) != null) {
-            final EntityType type = event.getDamager().getType();
             boolean toCancel = false;
-            switch (type) {
-                case PLAYER:
-                    if (!ConfigHelper.isTakingPlayerDamage(this.pegasusInstance.getConfig())) {
-                        toCancel = true;
-                    }
-                    break;
-                case BAT:
-                case BLAZE:
-                case CAVE_SPIDER:
-                case CREEPER:
-                case ENDERMAN:
-                case ENDER_DRAGON:
-                case GHAST:
-                case GIANT:
-                case IRON_GOLEM:
-                case MAGMA_CUBE:
-                case MUSHROOM_COW:
-                case OCELOT:
-                case PIG_ZOMBIE:
-                case SILVERFISH:
-                case SKELETON:
-                case SLIME:
-                case SPIDER:
-                case WITCH:
-                case WITHER:
-                case WITHER_SKULL:
-                case WOLF:
-                case ZOMBIE:
-                    if (!ConfigHelper.isTakingMonstersDamage(this.pegasusInstance.getConfig())) {
-                        toCancel = true;
-                    }
-                    break;
-                default:
-                    break;
+
+            if (!ConfigHelper.isTakingDamage(this.pegasusInstance.getConfig())) {
+                toCancel = true;
+            } else {
+                final EntityType type = event.getDamager().getType();
+                switch (type) {
+                    case PLAYER:
+                        if (!ConfigHelper.isTakingPlayerDamage(this.pegasusInstance.getConfig())) {
+                            toCancel = true;
+                        }
+                        break;
+                    case BAT:
+                    case BLAZE:
+                    case CAVE_SPIDER:
+                    case CREEPER:
+                    case ENDERMAN:
+                    case ENDER_DRAGON:
+                    case GHAST:
+                    case GIANT:
+                    case IRON_GOLEM:
+                    case MAGMA_CUBE:
+                    case MUSHROOM_COW:
+                    case OCELOT:
+                    case PIG_ZOMBIE:
+                    case SILVERFISH:
+                    case SKELETON:
+                    case SLIME:
+                    case SPIDER:
+                    case WITCH:
+                    case WITHER:
+                    case WITHER_SKULL:
+                    case WOLF:
+                    case ZOMBIE:
+                        if (!ConfigHelper.isTakingMonstersDamage(this.pegasusInstance.getConfig())) {
+                            toCancel = true;
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
             event.setCancelled(toCancel);
         }

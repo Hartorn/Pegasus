@@ -1,7 +1,7 @@
 package io.github.hartorn.Pegasus;
 
-import net.minecraft.server.v1_7_R1.EntityHorse;
-import net.minecraft.server.v1_7_R1.EntityInsentient;
+import net.minecraft.server.v1_7_R3.EntityHorse;
+import net.minecraft.server.v1_7_R3.EntityInsentient;
 
 import org.bukkit.entity.EntityType;
 

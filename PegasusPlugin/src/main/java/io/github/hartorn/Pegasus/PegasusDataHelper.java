@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -19,10 +20,10 @@ import net.minecraft.util.com.google.gson.stream.JsonWriter;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_7_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_7_R3.entity.CraftEntity;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -103,7 +104,6 @@ public class PegasusDataHelper
 
     public static void setPegasusProperties(final Horse monture, final Player player, final PegasusProperties properties, final Pegasus plugin)
     {
-
         monture.setCarryingChest(ConfigHelper.hasInventory(plugin.getConfig()));
         monture.setCanPickupItems(ConfigHelper.canPickUpItems(plugin.getConfig()));
         monture.setJumpStrength(ConfigHelper.getJumpStrength(plugin.getConfig()));
@@ -195,22 +195,7 @@ public class PegasusDataHelper
 
     public static Player getPlayerByUUID(final UUID playerID)
     {
-        if (playerID == null) {
-            return null;
-        }
-        final Player[] playerList = Bukkit.getOnlinePlayers();
-        for (final Player player : playerList) {
-            if (player.getUniqueId().compareTo(playerID) == 0) {
-                return player;
-            }
-        }
-        final OfflinePlayer[] offlinePlayerList = Bukkit.getOfflinePlayers();
-        for (final OfflinePlayer offlinePlayer : offlinePlayerList) {
-            if (offlinePlayer.getPlayer().getUniqueId().compareTo(playerID) == 0) {
-                return offlinePlayer.getPlayer();
-            }
-        }
-        return null;
+        return Bukkit.getServer().getPlayer(playerID);
     }
 
     public static <ParamType extends Entity> ParamType getEntityByUUIDAndByClass(final UUID entityId, final Class<ParamType> typeClass)
@@ -264,6 +249,80 @@ public class PegasusDataHelper
             }
         }
         return null;
+    }
+
+    public static void respawnPegasusByOwnerId(final Player player, final Pegasus plugin)
+    {
+        final UUID UUIDPlayer = player.getUniqueId();
+        final PegasusProperties properties = plugin.getPegasusData().get(UUIDPlayer);
+        if (properties != null && properties.getId() == null) {
+            PegasusDataHelper.respawnPegasus(player, properties, plugin);
+        }
+    }
+
+    public static void spawnPegasus(final Player player, final String[] args, final Pegasus plugin)
+    {
+        final Horse monture = PegasusEntity.spawn(player);
+        PegasusDataHelper.setPegasusProperties(monture, args, player, true, plugin);
+        plugin.getPegasusData().put(player.getUniqueId(), new PegasusProperties(monture));
+        plugin.getPegasusMap().put(monture.getUniqueId(), player.getUniqueId());
+        player.sendMessage("Your pegasus has spawned.");
+    }
+
+    public static void respawnPegasus(final Player player, final PegasusProperties properties, final Pegasus plugin)
+    {
+        final Horse monture = PegasusEntity.spawn(player);
+        PegasusDataHelper.setPegasusProperties(monture, player, properties, plugin);
+        plugin.getPegasusData().put(player.getUniqueId(), new PegasusProperties(monture));
+        plugin.getPegasusMap().put(monture.getUniqueId(), player.getUniqueId());
+        player.sendMessage("Your pegasus has respawned.");
+    }
+
+    public static void unloadPegasusInList(final List<Entity> unloadedEntities, final Pegasus plugin)
+    {
+        if (unloadedEntities != null) {
+            for (final Entity entity : unloadedEntities) {
+                PegasusDataHelper.unloadPegasusByEntity(entity, plugin);
+            }
+        }
+    }
+
+    public static void unloadPegasusInArray(final Entity[] unloadedEntities, final Pegasus plugin)
+    {
+        if (unloadedEntities != null) {
+            for (final Entity entity : unloadedEntities) {
+                if (entity != null) {
+                    PegasusDataHelper.unloadPegasusByEntity(entity, plugin);
+                }
+            }
+        }
+    }
+
+    public static void unloadPegasusByOwnerId(final UUID ownerId, final Pegasus plugin)
+    {
+        if (plugin.getPegasusProperties(ownerId) != null) {
+            final UUID pegasusId = plugin.getPegasusProperties(ownerId).getId();
+            if (pegasusId != null) {
+                PegasusDataHelper.unloadPegasusByEntity(PegasusDataHelper.getEntityByUUIDAndByClass(pegasusId, Horse.class), plugin);
+            }
+        }
+    }
+
+    public static void unloadPegasusByEntity(final Entity entity, final Pegasus plugin)
+    {
+        if (entity != null && EntityType.HORSE.compareTo(entity.getType()) == 0) {
+            final UUID ownerId = plugin.getPegasusOwnerUUID(entity.getUniqueId());
+            if (ownerId != null) {
+                final Horse monture = Horse.class.cast(entity);
+                plugin.getPegasusProperties(ownerId).setInventoryContents(InventorySerializer.getSerializedInventory(monture.getInventory()));
+                plugin.removePegasusByOwnerUUID(ownerId);
+                entity.remove();
+                final Player player = PegasusDataHelper.getPlayerByUUID(ownerId);
+                if (player != null && player.isOnline()) {
+                    player.sendMessage("Your Pegasus has been unloaded, you can respawn it using /pegasus-respawn");
+                }
+            }
+        }
     }
 
     public static int killPegasus(final Pegasus plugin)

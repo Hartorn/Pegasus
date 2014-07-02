@@ -27,11 +27,7 @@ public class PegasusPlayerCommandExecutor implements CommandExecutor
                 final UUID UUIDPlayer = player.getUniqueId();
                 final PegasusProperties properties = this.pegasusInstance.getPegasusData().get(UUIDPlayer);
                 if (properties == null || properties.getId() == null) {
-                    final Horse monture = PegasusEntity.spawn(player);
-                    PegasusDataHelper.setPegasusProperties(monture, args, player, true, this.pegasusInstance);
-                    this.pegasusInstance.getPegasusData().put(UUIDPlayer, new PegasusProperties(monture));
-                    this.pegasusInstance.getPegasusMap().put(monture.getUniqueId(), UUIDPlayer);
-                    player.sendMessage("Your pegasus has spawned.");
+                    PegasusDataHelper.spawnPegasus(player, args, this.pegasusInstance);
                 } else {
                     player.sendMessage("You already have a pegasus, use /pegasus-respawn to get it back.");
                 }
@@ -57,11 +53,7 @@ public class PegasusPlayerCommandExecutor implements CommandExecutor
                     player.sendMessage("You don't have any pegasus. You can create one using /pegasus-create");
                     return false;
                 } else if (properties.getId() == null) {
-                    final Horse monture = PegasusEntity.spawn(player);
-                    PegasusDataHelper.setPegasusProperties(monture, player, properties, this.pegasusInstance);
-                    this.pegasusInstance.getPegasusData().put(UUIDPlayer, new PegasusProperties(monture));
-                    this.pegasusInstance.getPegasusMap().put(monture.getUniqueId(), UUIDPlayer);
-                    player.sendMessage("Your pegasus has respawned.");
+                    PegasusDataHelper.respawnPegasus(player, properties, this.pegasusInstance);
                 } else {
                     final Horse horse = PegasusDataHelper.getEntityByUUIDAndByClass(properties.getId(), player.getWorld().getUID(), Horse.class);
                     if (horse != null) {
